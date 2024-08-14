@@ -1,4 +1,4 @@
-#include "course.hpp"
+#include "genre_psw.hpp"
 
 Password::Password(int min_l, int max_l, string chars) : min_l(min_l), max_l(max_l), chars(chars)
 { 
