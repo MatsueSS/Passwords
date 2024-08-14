@@ -11,37 +11,39 @@ using std::string;
 //not recommended edit this value
 enum { fault_num = 5 };
 
-class ErrorValue : public std::exception {
+class ErrorValues : public std::exception {
 protected:
     string msg;
 public:
-    ErrorValue(string msg) noexcept;
-    ErrorValue(const ErrorValue& obj) noexcept;
+    ErrorValues(string msg) noexcept;
+    ErrorValues(const ErrorValues& obj) noexcept;
 
-    virtual ~ErrorValue();
-    virtual const char* what() const noexcept override;
+    virtual ~ErrorValues();
+    const char* what() const noexcept override;
 };
 
-class Encryption {
+class Encrypt {
     string msg;
-public:
-    Encryption(string msg);
+    bool flag_crypt = 0;
 
-    operator std::string();
     void _decryption();
     void _encryption();
+public:
+    Encrypt(string msg = "");
+
+    operator string();
+    void set_msg(string msg, bool flag = 0);
 };
 
 class Password {
-    string chars, password = "";
-    Encryption obj();
-    int min_l {20}, max_l {21};
-    bool flag_crypt = 0;
+    Encrypt _password;
+    string chars;   
+    int min_l, max_l;
 
-    void _make_encryption();
-    void _make_decryption();
+    // void _make_encryption();
+    // void _make_decryption();
 public:
-    Password(string chars);
+    Password(int min_l = 20, int max_l = 21, string chars = "qwertuiopasdfghjklxcvbnm0123456789@$%&*!ABCDEFGHIJKLMNOPQRSTUVMXYZ");
 
     void operator()();
     string print_password();
