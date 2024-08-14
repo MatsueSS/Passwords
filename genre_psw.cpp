@@ -1,49 +1,40 @@
 #include "course.hpp"
 
-Password::Password(string chars = "qwertuiopasdfghjklxcvbnm0123456789@$%&*!ABCDEFGHIJKLMNOPQRSTUVMXYZ") : chars(chars) 
+Password::Password(int min_l, int max_l, string chars) : min_l(min_l), max_l(max_l), chars(chars)
 { 
     srand(time(nullptr)); 
 }
 
-void Password::_make_encryption() 
-{ 
-    for(int i = 0; i < password.size(); i++) {
-        password[i] += fault_num; 
-        if(password[i] > 126) password[i] = 32 + (password[i] - 127);
-    }
-    flag_crypt = 1; 
-}
-
-/*
-void Password::_make_encryption()
+void Password::operator()()
 {
-
-}
-*/
-
-void Password::_make_decryption() 
-{ 
-    for(int i = 0; i < password.size(); i++){
-        password[i] -= fault_num; 
-        if(password[i] < 32) password[i] = 127 - (32 - password[i]);
+    string psw = "";
+    int roll = rand()%(max_l-min_l)+min_l;
+    for(int i = 0; i < roll; i++)
+    {
+        psw += chars[rand()%chars.size()];
     }
-    flag_crypt = 0; 
+    this->_password.set_msg(psw);
 }
 
-void Password::write(std::ofstream& os, string name = "") 
-{ 
-    if(flag_crypt == 0) _make_encryption();
-    if(os.is_open()) os << name << " " << password << '\n';
-    else throw ErrorValue("File cannot be opened");
+string Password::print_password()
+{
+    return _password;
+}
+
+void Password::write(std::ofstream& os, string name)
+{
+    if(os.is_open()){ os << name << " " << string(_password) << '\n'; }
+    else throw ErrorValues("Error with write your file or created");
 }
 
 void Password::read(std::ifstream& is, string* array, int capacity = 100)
-{ 
+{
     if(is.is_open())
     {
         int size = 0;
         while(!is.eof())
         {
+            if(size == capacity) break;
             string psw = "";
             std::getline(is, array[size]);
             for(int i = 0, flag = 0; i < array[size].size(); i++)
@@ -51,55 +42,45 @@ void Password::read(std::ifstream& is, string* array, int capacity = 100)
                 if(flag == 1) psw+=array[size][i];
                 if(array[size][i] == ' ') flag = 1;
             }
-            this->password = psw;
-            _make_decryption();
-            array[size++] = password;
+            _password.set_msg(psw, true);
+            array[size++] = _password;
         }
     }
-    else throw ErrorValue("File cannot be opened");
+    else throw ErrorValues("Error with read your file");
 }
 
-string Password::print_password() 
-{ 
-    _make_decryption(); 
-    return password;
-}
+ErrorValues::ErrorValues(string msg) noexcept : msg(msg) { }
+ErrorValues::ErrorValues(const ErrorValues& obj) noexcept : msg(obj.msg) { }
+ErrorValues::~ErrorValues() { }
 
-void Password::operator()() 
-{
-    password = "";
-    int roll = rand()%(max_l-min_l)+min_l;
-    for(int i = 0; i < roll; i++)
-    {
-        password += chars[rand()%chars.size()];
-    }
-    _make_encryption();
-}
+const char* ErrorValues::what() const noexcept { return msg.c_str(); }
 
-ErrorValue::ErrorValue(string msg) : msg(msg) { }
-ErrorValue::ErrorValue(const ErrorValue& obj) : msg(obj.msg) { }
-ErrorValue::~ErrorValue() { }
+Encrypt::Encrypt(string msg) : msg(msg) { _encryption(); }
 
-const char* ErrorValue::what() const { return msg.c_str(); }
+Encrypt::operator string() { _decryption(); string new_msg = msg; _encryption(); return new_msg; }
 
-Encryption::Encryption(string msg = "") : msg(msg) { }
-
-Encryption::operator std::string() { return msg; }
-
-void Encryption::_encryption() 
+void Encrypt::_encryption() 
 {
     for(int i = 0; i < msg.size(); i++) {
         msg[i] += fault_num; 
         if(msg[i] > 126) msg[i] = 32 + (msg[i] - 127);
     }
+    flag_crypt = 1;
 }
 
-void Encryption::_decryption()
+void Encrypt::_decryption()
 {
     for(int i = 0; i < msg.size(); i++){
         msg[i] -= fault_num; 
         if(msg[i] < 32) msg[i] = 127 - (32 - msg[i]);
     }
+    flag_crypt = 0;
+}
+
+void Encrypt::set_msg(string msg, bool flag) 
+{ 
+    if(flag == 0) { this->msg = msg; _encryption(); }
+    else { this->msg = msg; }
 }
 
 int main(void)
