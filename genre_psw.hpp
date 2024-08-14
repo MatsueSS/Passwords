@@ -1,5 +1,5 @@
-#ifndef _COURSE_HPP_
-#define _COURSE_HPP_
+#ifndef _GENRE_PSW_HPP_
+#define _GENRE_PSW_HPP_
 
 #include <iostream>
 #include <string>
@@ -51,4 +51,4 @@ public:
     void read(std::ifstream& is, string* array, int capacity);
 };
 
-#endif //_COURSE_HPP_
+#endif //_GENRE_PSW_HPP_
