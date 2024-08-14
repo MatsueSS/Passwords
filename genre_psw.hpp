@@ -39,9 +39,6 @@ class Password {
     Encrypt _password;
     string chars;   
     int min_l, max_l;
-
-    // void _make_encryption();
-    // void _make_decryption();
 public:
     Password(int min_l = 20, int max_l = 21, string chars = "qwertuiopasdfghjklxcvbnm0123456789@$%&*!ABCDEFGHIJKLMNOPQRSTUVMXYZ");
 
