@@ -71,7 +71,7 @@ public:
 
     void removePassword(string name);
     void addPassword(string name, Password psw);
-    void sortPasswords(sort type);
+    void sortPasswords(sort type, bool(*func)(string, string));
     
     string operator[](int size);
 
@@ -79,6 +79,8 @@ public:
     virtual void write(string fileName) override;
 
     friend void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string));
+    friend void ChoiceSort(LibPasswords& lib, int n, bool(*func)(string, string));
+    
 };
 
 #endif //_PASSWORDS_H_
