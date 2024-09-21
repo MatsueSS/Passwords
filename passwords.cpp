@@ -111,13 +111,27 @@ string LibPasswords::operator[](int size){
     for(int i = 0; i < libPsw.size() && i != size; i++) it++;
     return (*it).first;
 }
+template <typename T>
+bool increase(T a, T b) { return a > b; }
 
+template<typename T>
+bool decrease(T a, T b) { return a < b; }
+
+void LibPasswords::sortPasswords(sort type, bool(*func)(string, string)){
+    switch (type){
+    case _quick_sort:
+        QuickSort(*this, 0, libPsw.size(), func);
+        break;
+    case _choice_sort:
+        ChoiceSort(*this, libPsw.size(), func);
+        break;
+    }
+}
 void swap(std::map<string, Password>::iterator a, std::map<string, Password>::iterator b){
     std::map<string, Password>::iterator temp = a;
     a = b;
     b = temp;
 }
-
 void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string)){
     if(low > high) return;
     string p = lib[(low+high)/2];
@@ -131,4 +145,16 @@ void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string)
     }
     QuickSort(lib, low, j, func);
     QuickSort(lib, i, high, func);
+}
+void ChoiceSort(LibPasswords& lib, int n, bool(*func)(string, string)){
+    for(int i = 0; i < lib.libPsw.size()-1; i++){
+        string temp = lib[i];
+        int flagJ;
+        for(int j = i+1; j < lib.libPsw.size(); j++){
+            if(func(temp, lib[j])) { temp = lib[j]; flagJ = j; }
+        }
+        if(temp != lib[i]){
+            swap(lib.libPsw.find(lib[i]), lib.libPsw.find(lib[flagJ]));
+        }
+    }
 }
