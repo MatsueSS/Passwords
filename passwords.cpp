@@ -28,9 +28,9 @@ void Encrypt::_decryption(){
 }
 void Encrypt::getMsg(string& msg) { _decryption(); msg = this->msg; _encryption(); }
 void Encrypt::setMsg(string newMsg) { msg = newMsg; _encryption(); }
-string Encrypt::showMsg() const { return msg; }
+string& Encrypt::showMsg() { return msg; }
 
-Password::Password(int min_l, int max_l, string chars) : min_l(min_l), max_l(max_l), chars(chars) { srand(time(nullptr)); }
+Password::Password(string name, int min_l, int max_l, string chars) : name(name), min_l(min_l), max_l(max_l), chars(chars) { srand(time(nullptr)); }
 void Password::generatePassword(){
     string psw = "";
     int length = rand()%(max_l-min_l)+min_l;
@@ -40,28 +40,36 @@ void Password::generatePassword(){
     password.setMsg(psw);
 }
 Password::Password(Encrypt msg) : password(msg) {}
+
 string Password::printPassword() { string psw; password.getMsg(psw); return psw; }
-Encrypt Password::showPassword() const { return password; }
+
+string Password::showPassword() { return password.showMsg(); }
+
+string Password::showName() const { return name; }
+
 /*virtual*/void Password::read(string fileName){
     std::ifstream file(fileName);
     if(file.is_open()){
         string psw = "";
         while(!file.eof()){
-            string line;
+            string line = "";
             std::getline(file, line);
+            if(line.size() < 3) break;
+            name = ""; 
+            psw = "";
             for(int i = 0, flag = 0; i < line.size(); i++){
                 if(flag == 1) psw += line[i];
                 if(line[i] == ' ') flag = 1;
                 if(flag == 0) name += line[i];
             }
         }
-        password.setMsg(psw);
+        password.showMsg() = psw;
     }
     else throw ErrorValues("File cannot be opened");
     file.close();
 }
 /*virtual*/void Password::write(string fileName){
-    std::ofstream file(fileName);
+    std::ofstream file(fileName, std::ios::app);
     if(file.is_open()){
         file << name << " " << password.showMsg() << "\n";
     }
@@ -87,7 +95,9 @@ void LibPasswords::removePassword(string name){
                 if(line[i] == ' ') flag = 1;
                 if(flag == 0) name += line[i];
             }
-            addPassword(name, Password(Encrypt(psw)));
+            Encrypt obj;
+            obj.showMsg() = psw;
+            addPassword(name, Password(obj));
         }
     }
     else throw ErrorValues("File cannot be opened");
@@ -98,7 +108,7 @@ void LibPasswords::removePassword(string name){
     if(file.is_open()){
         std::map<string, Password>::iterator it = libPsw.begin();
         while(it != libPsw.end()){
-            file << (*it).first << " " << (*it).second.showPassword().showMsg() << "\n";
+            file << (*it).first << " " << (*it).second.showPassword() << "\n";
             it++;
         }
     }
@@ -111,27 +121,20 @@ string LibPasswords::operator[](int size){
     for(int i = 0; i < libPsw.size() && i != size; i++) it++;
     return (*it).first;
 }
-template <typename T>
-bool increase(T a, T b) { return a > b; }
-
-template<typename T>
-bool decrease(T a, T b) { return a < b; }
-
-void LibPasswords::sortPasswords(sort type, bool(*func)(string, string)){
-    switch (type){
-    case _quick_sort:
-        QuickSort(*this, 0, libPsw.size(), func);
-        break;
-    case _choice_sort:
-        ChoiceSort(*this, libPsw.size(), func);
-        break;
+void LibPasswords::show(){
+    std::map<string, Password>::iterator it = libPsw.begin();
+    while(it != libPsw.end()){
+        std::cout << (*it).second.showPassword() << " ";
+        it++;
     }
 }
+
 void swap(std::map<string, Password>::iterator a, std::map<string, Password>::iterator b){
     std::map<string, Password>::iterator temp = a;
     a = b;
     b = temp;
 }
+
 void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string)){
     if(low > high) return;
     string p = lib[(low+high)/2];
@@ -146,15 +149,11 @@ void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string)
     QuickSort(lib, low, j, func);
     QuickSort(lib, i, high, func);
 }
-void ChoiceSort(LibPasswords& lib, int n, bool(*func)(string, string)){
-    for(int i = 0; i < lib.libPsw.size()-1; i++){
-        string temp = lib[i];
-        int flagJ;
-        for(int j = i+1; j < lib.libPsw.size(); j++){
-            if(func(temp, lib[j])) { temp = lib[j]; flagJ = j; }
-        }
-        if(temp != lib[i]){
-            swap(lib.libPsw.find(lib[i]), lib.libPsw.find(lib[flagJ]));
-        }
-    }
+
+int main(void)
+{
+    Password psw4("");
+    psw4.read("test123.txt");
+    std::cout << psw4.showName() << " " << psw4.showPassword();
+    return 0;
 }
