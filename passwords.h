@@ -40,7 +40,7 @@ public:
 
     void getMsg(string& msg);
     void setMsg(string newMsg);
-    string showMsg() const;
+    string& showMsg();
 };
 
 class Password : public File {
@@ -50,11 +50,12 @@ class Password : public File {
     int min_l, max_l; // length password
 
 public:
-    Password(int min_l = 20, int max_l = 21, string chars = "qwertuiopasdfghjklxcvbnm0123456789@$%&*!ABCDEFGHIJKLMNOPQRSTUVMXYZ");
+    Password(string name, int min_l = 20, int max_l = 21, string chars = "qwertuiopasdfghjklxcvbnm0123456789@$%&*!ABCDEFGHIJKLMNOPQRSTUVMXYZ");
     Password(Encrypt msg);
 
+    string showName() const;
     void generatePassword();
-    Encrypt showPassword() const;
+    string showPassword();
     string printPassword();
 
     virtual void read(string fileName) override;
@@ -71,7 +72,10 @@ public:
 
     void removePassword(string name);
     void addPassword(string name, Password psw);
-    void sortPasswords(sort type, bool(*func)(string, string));
+    void sortPasswords(sort type);
+    /*test func |*/
+    void show();
+    /*test func |*/
     
     string operator[](int size);
 
@@ -79,8 +83,6 @@ public:
     virtual void write(string fileName) override;
 
     friend void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string));
-    friend void ChoiceSort(LibPasswords& lib, int n, bool(*func)(string, string));
-    
 };
 
 #endif //_PASSWORDS_H_
