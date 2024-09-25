@@ -19,12 +19,13 @@ public:
 
     virtual ~ErrorValues();
     const char* what() const noexcept override;
+
 };
 
 class File {
 public:
-    virtual void read(string fileName) = 0;
-    virtual void write(string fileName) = 0;
+    virtual void read(const string& filename) = 0;
+    virtual void write(const string& filename) = 0;
 };
 
 class Encrypt {
@@ -43,7 +44,7 @@ public:
     string& showMsg();
 };
 
-class Password : public File {
+class Password {
     string name; // name of password
     Encrypt password; // password
     string chars; // chars for generate password  
@@ -53,16 +54,25 @@ public:
     Password(string name, int min_l = 20, int max_l = 21, string chars = "qwertuiopasdfghjklxcvbnm0123456789@$%&*!ABCDEFGHIJKLMNOPQRSTUVMXYZ");
     Password(Encrypt msg);
 
-    string showName() const;
+    string& showName();
     void generatePassword();
-    string showPassword();
+    string& showPassword();
     string printPassword();
 
-    virtual void read(string fileName) override;
-    virtual void write(string fileName) override;
+    void read(const string& fileName);
+    void write(const string& fileName);
 };
 
-class LibPasswords : public File {
+class PasswordFileManager : public File {
+    Password password;
+public:
+    PasswordFileManager(Password& psw);
+
+    virtual void write(const string& filename) override;
+    virtual void read(const string& filename) override;
+};
+
+class LibPasswords {
     std::map<string, Password> libPsw;
 
     enum sort { _quick_sort = 0, _choice_sort = 1, _bubble_sort = 2, _pyramid_sort = 3, _insert_sort = 4 };
@@ -73,16 +83,25 @@ public:
     void removePassword(string name);
     void addPassword(string name, Password psw);
     void sortPasswords(sort type);
-    /*test func |*/
-    void show();
-    /*test func |*/
+    Password findPassword(const string& name);
+
+    std::map<string, Password>& getLib();
     
     string operator[](int size);
 
-    virtual void read(string fileName) override;
-    virtual void write(string fileName) override;
+    void read(const string& fileName);
+    void write(const string& fileName);
 
     friend void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string));
+};
+
+class LibPasswordsFileManager : public File {
+    LibPasswords lib;
+public:
+    LibPasswordsFileManager(LibPasswords&  lib);
+
+    virtual void write(const string& filename) override;
+    virtual void read(const string& filename) override;
 };
 
 #endif //_PASSWORDS_H_
