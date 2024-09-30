@@ -64,9 +64,9 @@ public:
 };
 
 class PasswordFileManager : public File {
-    Password password;
+    Password* password;
 public:
-    PasswordFileManager(Password& psw);
+    PasswordFileManager(Password* psw);
 
     virtual void write(const string& filename) override;
     virtual void read(const string& filename) override;
@@ -96,9 +96,9 @@ public:
 };
 
 class LibPasswordsFileManager : public File {
-    LibPasswords lib;
+    LibPasswords* lib;
 public:
-    LibPasswordsFileManager(LibPasswords&  lib);
+    LibPasswordsFileManager(LibPasswords* lib);
 
     virtual void write(const string& filename) override;
     virtual void read(const string& filename) override;
