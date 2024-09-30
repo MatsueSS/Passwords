@@ -47,7 +47,7 @@ string& Password::showPassword() { return password.showMsg(); }
 
 string& Password::showName() { return name; }
 
-PasswordFileManager::PasswordFileManager(Password& password) : password(password) {}
+PasswordFileManager::PasswordFileManager(Password* password) : password(password) {}
 
 /*virtual*/void PasswordFileManager::read(const string& filename)
 {
@@ -58,15 +58,15 @@ PasswordFileManager::PasswordFileManager(Password& password) : password(password
             string line = "";
             std::getline(file, line);
             if(line.size() < 3) break;
-            password.showName() = ""; 
+            password->showName() = ""; 
             psw = "";
             for(int i = 0, flag = 0; i < line.size(); i++){
                 if(flag == 1) psw += line[i];
                 if(line[i] == ' ') flag = 1;
-                if(flag == 0) password.showName() += line[i];
+                if(flag == 0) password->showName() += line[i];
             }
         }
-        password.showPassword() = psw;
+        password->showPassword() = psw;
     }
     else throw ErrorValues("File cannot be opened");
     file.close();
@@ -76,18 +76,18 @@ PasswordFileManager::PasswordFileManager(Password& password) : password(password
 {
     std::ofstream file(filename, std::ios::app);
     if(file.is_open()){
-        file << password.showName() << " " << password.showPassword() << "\n";
+        file << password->showName() << " " << password->showPassword() << "\n";
     }
     else throw ErrorValues("File cannot be opened");
     file.close();
 }
 
 void Password::read(const string& filename){
-    PasswordFileManager user(*this);
+    PasswordFileManager user(this);
     user.read(filename);
 }
 void Password::write(const string& filename){
-    PasswordFileManager user(*this);
+    PasswordFileManager user(this);
     user.write(filename);
 }
 
@@ -107,7 +107,7 @@ std::map<string, Password>& LibPasswords::getLib(){
     return libPsw;
 }
 
-LibPasswordsFileManager::LibPasswordsFileManager(LibPasswords& lib) : lib(lib) {}
+LibPasswordsFileManager::LibPasswordsFileManager(LibPasswords* lib) : lib(lib) {}
 
 /*virtual*/void LibPasswordsFileManager::read(const string& filename){
     std::ifstream file(filename);
@@ -122,7 +122,7 @@ LibPasswordsFileManager::LibPasswordsFileManager(LibPasswords& lib) : lib(lib) {
             }
             Encrypt obj;
             obj.showMsg() = psw;
-            lib.addPassword(name, Password(obj));
+            lib->addPassword(name, Password(obj));
         }
     }
     else throw ErrorValues("File cannot be opened");
@@ -131,8 +131,8 @@ LibPasswordsFileManager::LibPasswordsFileManager(LibPasswords& lib) : lib(lib) {
 /*virtual*/void LibPasswordsFileManager::write(const string& filename){
     std::ofstream file(filename);
     if(file.is_open()){
-        std::map<string, Password>::iterator it = lib.getLib().begin();
-        while(it != lib.getLib().end()){
+        std::map<string, Password>::iterator it = lib->getLib().begin();
+        while(it != lib->getLib().end()){
             file << (*it).first << " " << (*it).second.showPassword() << "\n";
             it++;
         }
@@ -142,11 +142,11 @@ LibPasswordsFileManager::LibPasswordsFileManager(LibPasswords& lib) : lib(lib) {
 }
 
 void LibPasswords::read(const string& filename){
-    LibPasswordsFileManager user(*this);
+    LibPasswordsFileManager user(this);
     user.read(filename);
 }
 void LibPasswords::write(const string& filename){
-    LibPasswordsFileManager user(*this);
+    LibPasswordsFileManager user(this);
     user.write(filename);
 }
 string LibPasswords::operator[](int size){
