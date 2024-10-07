@@ -6,11 +6,15 @@
 #include <algorithm>
 
 ErrorValues::ErrorValues(string msg) noexcept : msg(msg) {}
+
 ErrorValues::ErrorValues(const ErrorValues& obj) noexcept : msg(obj.msg) {}
+
 ErrorValues::~ErrorValues() {}
+
 const char* ErrorValues::what() const noexcept { return msg.c_str(); }
 
 Encrypt::Encrypt(string msg) : msg(msg) { _encryption(); }
+
 void Encrypt::_encryption(){
     for(int i = 0; i < msg.size(); i++){
         msg[i] += fault_num;
@@ -19,6 +23,7 @@ void Encrypt::_encryption(){
     flag_crypt = 1;
 }
 Encrypt::Encrypt(const Encrypt& obj) : msg(obj.msg), flag_crypt(obj.flag_crypt) {}
+
 void Encrypt::_decryption(){
     for(int i = 0; i < msg.size(); i++){
         msg[i] -= fault_num;
@@ -26,26 +31,50 @@ void Encrypt::_decryption(){
     }
     flag_crypt = 0;
 }
-void Encrypt::getMsg(string& msg) { _decryption(); msg = this->msg; _encryption(); }
-void Encrypt::setMsg(string newMsg) { msg = newMsg; _encryption(); }
-string& Encrypt::showMsg() { return msg; }
+
+const string Encrypt::getDecryptMsg() {
+    _decryption();
+    string temp = msg;
+    _encryption();
+    return temp;
+}
+
+void Encrypt::setDecryptMsg(const string& msg) {
+    _decryption();
+    this->msg = msg;
+    _encryption();
+}
+
+const string& Encrypt::getEncryptMsg() {
+    return msg;
+}
+
+void Encrypt::setEncryptMsg(const string& msg){
+    this->msg = msg;
+}
 
 Password::Password(string name, int min_l, int max_l, string chars) : name(name), min_l(min_l), max_l(max_l), chars(chars) { srand(time(nullptr)); }
+
 void Password::generatePassword(){
     string psw = "";
     int length = rand()%(max_l-min_l)+min_l;
     for(int i = 0; i < length; i++){
         psw += chars[rand()%chars.size()];
     }
-    password.setMsg(psw);
+    password.setDecryptMsg(psw);
 }
+
 Password::Password(Encrypt msg) : password(msg) {}
 
-string Password::printPassword() { string psw; password.getMsg(psw); return psw; }
+const string Password::printPassword() { return password.getDecryptMsg(); }
 
-string& Password::showPassword() { return password.showMsg(); }
+void Password::setPassword(const string& psw) { password.setEncryptMsg(psw); }
 
-string& Password::showName() { return name; }
+const string& Password::getPassword() { return password.getEncryptMsg(); }
+
+const string& Password::getName() { return name; }
+
+void Password::setName(const string &name) { this->name = name; }
 
 PasswordFileManager::PasswordFileManager(Password* password) : password(password) {}
 
@@ -54,19 +83,21 @@ PasswordFileManager::PasswordFileManager(Password* password) : password(password
     std::ifstream file(filename);
     if(file.is_open()){
         string psw = "";
+        string name = "";
         while(!file.eof()){
             string line = "";
             std::getline(file, line);
             if(line.size() < 3) break;
-            password->showName() = ""; 
+            name = "";
             psw = "";
             for(int i = 0, flag = 0; i < line.size(); i++){
                 if(flag == 1) psw += line[i];
                 if(line[i] == ' ') flag = 1;
-                if(flag == 0) password->showName() += line[i];
+                if(flag == 0) name += line[i];
             }
         }
-        password->showPassword() = psw;
+        password->setName(name);
+        password->setPassword(psw);
     }
     else throw ErrorValues("File cannot be opened");
     file.close();
@@ -76,7 +107,7 @@ PasswordFileManager::PasswordFileManager(Password* password) : password(password
 {
     std::ofstream file(filename, std::ios::app);
     if(file.is_open()){
-        file << password->showName() << " " << password->showPassword() << "\n";
+        file << password->getName() << " " << password->getPassword() << "\n";
     }
     else throw ErrorValues("File cannot be opened");
     file.close();
@@ -115,13 +146,14 @@ LibPasswordsFileManager::LibPasswordsFileManager(LibPasswords* lib) : lib(lib) {
         while(!file.eof()){
             string line, name = "", psw = "";
             std::getline(file, line);
+            if(line.size() < 3) break;
             for(int i = 0, flag = 0; i < line.size(); i++){
                 if(flag == 1) psw += line[i];
                 if(line[i] == ' ') flag = 1;
                 if(flag == 0) name += line[i];
             }
             Encrypt obj;
-            obj.showMsg() = psw;
+            obj.setEncryptMsg(psw);
             lib->addPassword(name, Password(obj));
         }
     }
@@ -133,7 +165,7 @@ LibPasswordsFileManager::LibPasswordsFileManager(LibPasswords* lib) : lib(lib) {
     if(file.is_open()){
         std::map<string, Password>::iterator it = lib->getLib().begin();
         while(it != lib->getLib().end()){
-            file << (*it).first << " " << (*it).second.showPassword() << "\n";
+            file << (*it).first << " " << (*it).second.getPassword() << "\n";
             it++;
         }
     }
@@ -179,8 +211,8 @@ void QuickSort(LibPasswords& lib, int low, int high, bool(*func)(string, string)
 
 int main(void)
 {
-    Password psw4("");
-    psw4.read("test123.txt");
-    std::cout << psw4.showName() << " " << psw4.showPassword();
+    LibPasswords lib;
+    lib.read("file.txt");
+
     return 0;
 }
