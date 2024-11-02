@@ -1,0 +1,5 @@
+/home/michael/A/Passwords/build/CMakeFiles/Passwords.dir
+/home/michael/A/Passwords/build/CMakeFiles/Tests.dir
+/home/michael/A/Passwords/build/CMakeFiles/test.dir
+/home/michael/A/Passwords/build/CMakeFiles/edit_cache.dir
+/home/michael/A/Passwords/build/CMakeFiles/rebuild_cache.dir
