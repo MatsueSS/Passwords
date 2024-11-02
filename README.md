@@ -1,8 +1,7 @@
-ManagerPasswordsEncrypted
+PasswordsManager
 
-I want to share my application, which I decided to create to improve my life and work with third-party resources, where it is important to have your own account.
-My application generates a password from a set of characters (specified by the user, can be used by default) and any length (also specified by the user, but can be used by default).
-This program provides for the handling of exceptions that occur when working with files.
-My code is well structured in my opinion, which makes it easy to use.
-I also want to add that when encrypting messages in the class Encrypt, an algorithm is written that does not go beyond the ASCII table when saving and reading. That is, all characters from 33 to 126 are read. Therefore, going beyond this is impossible.
-The program is a very convenient solution for storing passwords, because I consider this method non-trivial.
+I would like to introduce my own pet project, which I decided to write in a fit of inspiration while studying C++. The technologies of this language interested me incredibly. As a task for myself, I decided to write my own password handler. This idea inspired me because there is nothing like this for me.
+This project presents password encryption using the Caesar method, the implementation of reading and writing data from and to a file.
+It seemed strange to me to implement the project without using Cmake, because I believe that assembling a project and breaking it down into a readable, expandable and convenient structure is the priority of any project.
+I am going to use this project now, because it is convenient and performs the main function - it makes my life easier.
+In the future, I will probably use this project as a library, for my next projects.
